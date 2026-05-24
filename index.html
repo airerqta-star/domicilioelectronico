@@ -21,482 +21,485 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body {
-            font-family: 'Open Sans', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
-        }
-        h1, h2, h3, h4 {
-            font-family: 'Merriweather', serif;
-        }
-        .slide {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 4rem 2rem;
-            border-bottom: 2px solid #e5e7eb;
-            background-color: #ffffff;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1rem;
-        }
-        .slide:first-of-type {
-            background: linear-gradient(to bottom right, #1e3a8a, #111827);
-            color: white;
-        }
-        .slide-content {
-            max-width: 1000px;
-            margin: 0 auto;
-            width: 100%;
-        }
+        body { font-family: 'Open Sans', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+        h1, h2, h3, h4, .font-serif { font-family: 'Merriweather', serif; }
+        
+        /* Navegación por Pestañas */
+        .tab-content { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .tab-content.active { display: block; }
+        
+        .slide { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 4rem 2rem; border-bottom: 2px solid #e5e7eb; background-color: #ffffff; margin-bottom: 1rem; }
+        .slide:first-of-type { background: linear-gradient(to bottom right, #1e3a8a, #111827); color: white; }
+        .slide-content { max-width: 1000px; margin: 0 auto; width: 100%; }
+        
+        /* Animaciones */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Inputs del Formulario DDJJ */
+        .input-line { border: none; border-bottom: 1px solid #4b5563; background: transparent; width: 100%; outline: none; padding: 2px 5px; font-family: 'Open Sans', sans-serif; }
+        .input-line:focus { border-bottom: 2px solid #1e3a8a; }
+
+        /* Estilos específicos para Impresión del Formulario */
         @media print {
-            .slide {
-                min-height: auto;
-                page-break-after: always;
-                box-shadow: none;
-                margin: 0;
-                padding: 2rem;
-            }
-            body { background-color: white; }
-        }
-        .fade-in {
-            animation: fadeIn 1s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            .no-print { display: none !important; }
+            body { background-color: white; padding: 0; margin: 0; }
+            .printing-form body * { visibility: hidden; }
+            .printing-form #ddjj-form-container, .printing-form #ddjj-form-container * { visibility: visible; }
+            .printing-form #ddjj-form-container { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; box-shadow: none; }
+            .input-line { border-bottom: 1px solid #000; }
         }
     </style>
 </head>
-<body>
+<body class="pt-20"> <!-- Padding top para la barra fija -->
 
-    <!-- PORTADA -->
-    <section class="slide">
-        <div class="slide-content text-center fade-in">
-            <div class="flex flex-col md:flex-row justify-center items-center gap-6 mb-8">
-                <img src="https://res.cloudinary.com/dthg9wo6r/image/upload/v1763866183/Reconquista_Logo-2022_BLANCOEslogan-768x155_jpqe3v.png" alt="Municipalidad de Reconquista" class="h-16 md:h-20 object-contain">
-                <div class="hidden md:block w-px h-16 bg-gray-500 opacity-50"></div>
-                <img src="https://res.cloudinary.com/dthg9wo6r/image/upload/v1763864223/Boton-Control-Publico-768x772_xvw7h5.png" alt="Secretaría de Control Público" class="h-16 md:h-20 object-contain">
+    <!-- BARRA DE NAVEGACIÓN FIJA -->
+    <nav class="fixed top-0 left-0 w-full bg-blue-900 text-white shadow-lg z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-4">
+                    <img src="https://res.cloudinary.com/dthg9wo6r/image/upload/v1763866183/Reconquista_Logo-2022_BLANCOEslogan-768x155_jpqe3v.png" alt="Muni" class="h-10">
+                    <div class="w-px h-8 bg-blue-400 opacity-50 hidden sm:block"></div>
+                    <span class="font-serif font-bold text-lg hidden sm:block">Control Público</span>
+                </div>
+                <div class="flex space-x-1 md:space-x-4">
+                    <button onclick="switchTab('tab-informe', this)" class="tab-btn px-3 py-2 rounded-md text-sm md:text-base font-medium bg-blue-800 text-white hover:bg-blue-700 transition">Presentación</button>
+                    <button onclick="switchTab('tab-flujo', this)" class="tab-btn px-3 py-2 rounded-md text-sm md:text-base font-medium text-blue-200 hover:bg-blue-700 hover:text-white transition">Procedimiento</button>
+                    <button onclick="switchTab('tab-ddjj', this)" class="tab-btn px-3 py-2 rounded-md text-sm md:text-base font-medium text-blue-200 hover:bg-blue-700 hover:text-white transition">Formulario DDJJ</button>
+                    <button onclick="switchTab('tab-ordenanza', this)" class="tab-btn px-3 py-2 rounded-md text-sm md:text-base font-medium text-blue-200 hover:bg-blue-700 hover:text-white transition">Ordenanza</button>
+                </div>
             </div>
-            
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-white">
-                <span class="text-2xl md:text-3xl font-light text-gray-300 block mb-3">Análisis sobre:</span>
-                Constitución del Domicilio Especial Electrónico
-            </h1>
-            
-            <div class="bg-blue-900/60 border border-blue-400/30 text-blue-100 p-4 rounded-lg inline-block max-w-4xl text-sm md:text-base mb-8 mx-auto shadow-lg backdrop-blur-sm">
-                Este informe obedece al <strong>Expediente N° 229/2026 - DEPARTAMENTO EJECUTIVO MUNICIPAL - Nota - N - Ref. ELEVA MENSAJE 15/26 - P.O. REGIMEN DE DIGITALIZACIÓN INTEGRAL. Domicilio Electrónico.</strong>
-            </div>
-            
-            <div class="bg-white/10 p-6 rounded-lg backdrop-blur-sm max-w-2xl mx-auto text-center border border-white/20 shadow-xl">
-                <p class="text-xl font-bold text-white mb-1">Abog. Ricardo Franco</p>
-                <p class="text-sm text-gray-300 mb-6">Director de la Agencia Gubernamental de Control</p>
-                
-                <p class="text-xl font-bold text-white mb-1">Lic. Nicolás Sandrigo</p>
-                <p class="text-sm text-gray-300">Secretario de Control Público</p>
-            </div>
-            <p class="mt-10 text-gray-400 font-serif italic">Comisión de Gobierno - Honorable Concejo Municipal</p>
         </div>
-    </section>
+    </nav>
 
-    <!-- OBJETIVOS Y CONTEXTO -->
-    <section class="slide bg-white">
-        <div class="slide-content fade-in">
-            <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
-                <i data-lucide="target" class="w-10 h-10 text-blue-900 mr-4"></i>
-                <h2 class="text-3xl font-bold text-blue-900">Contexto y Objetivos Estratégicos</h2>
+    <!-- ==========================================
+         PESTAÑA 1: PRESENTACIÓN (INFORME ORIGINAL)
+         ========================================== -->
+    <div id="tab-informe" class="tab-content active">
+        <!-- PORTADA -->
+        <section class="slide">
+            <div class="slide-content text-center">
+                <div class="flex flex-col md:flex-row justify-center items-center gap-6 mb-8 mt-[-4rem]">
+                    <img src="https://res.cloudinary.com/dthg9wo6r/image/upload/v1763866183/Reconquista_Logo-2022_BLANCOEslogan-768x155_jpqe3v.png" alt="Municipalidad de Reconquista" class="h-16 md:h-20 object-contain">
+                    <div class="hidden md:block w-px h-16 bg-gray-500 opacity-50"></div>
+                    <img src="https://res.cloudinary.com/dthg9wo6r/image/upload/v1763864223/Boton-Control-Publico-768x772_xvw7h5.png" alt="Secretaría de Control Público" class="h-16 md:h-20 object-contain">
+                </div>
+                
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-white">
+                    <span class="text-2xl md:text-3xl font-light text-gray-300 block mb-3">Análisis sobre:</span>
+                    Constitución del Domicilio Especial Electrónico
+                </h1>
+                
+                <div class="bg-blue-900/60 border border-blue-400/30 text-blue-100 p-4 rounded-lg inline-block max-w-4xl text-sm md:text-base mb-8 mx-auto shadow-lg backdrop-blur-sm">
+                    Este informe obedece al <strong>Expediente N° 229/2026 - DEPARTAMENTO EJECUTIVO MUNICIPAL - Nota - N - Ref. ELEVA MENSAJE 15/26 - P.O. REGIMEN DE DIGITALIZACIÓN INTEGRAL. Domicilio Electrónico.</strong>
+                </div>
+                
+                <div class="bg-white/10 p-6 rounded-lg backdrop-blur-sm max-w-2xl mx-auto text-center border border-white/20 shadow-xl">
+                    <p class="text-xl font-bold text-white mb-1">Abog. Ricardo Franco</p>
+                    <p class="text-sm text-gray-300 mb-6">Director de la Agencia Gubernamental de Control</p>
+                    
+                    <p class="text-xl font-bold text-white mb-1">Lic. Nicolás Sandrigo</p>
+                    <p class="text-sm text-gray-300">Secretario de Control Público</p>
+                </div>
+                <p class="mt-10 text-gray-400 font-serif italic">Comisión de Gobierno - Honorable Concejo Municipal</p>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <p class="text-lg leading-relaxed mb-6 text-gray-700">
-                        La Secretaría de Control Público enfrenta el desafío diario de garantizar el debido proceso en el juzgamiento de faltas e infracciones administrativas. Actualmente, el diligenciamiento de notificaciones en formato papel representa un dispendio jurisdiccional, económico y ecológico injustificable en el siglo XXI.
-                    </p>
-                    <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-800">
-                        <h4 class="font-bold text-blue-900 mb-2">La Política de Despapelización</h4>
-                        <p class="text-sm text-gray-700">
-                            La modernización del Estado y la "despapelización" son objetivos transversales en todos los niveles de gobierno. Reemplazar la cédula física por un mecanismo digital fehaciente optimiza los recursos de la Agencia Gubernamental de Control y del Juzgado Municipal de Faltas.
+        </section>
+
+        <!-- CONTEXTO Y OBJETIVOS -->
+        <section class="slide bg-white">
+            <div class="slide-content">
+                <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
+                    <i data-lucide="target" class="w-10 h-10 text-blue-900 mr-4"></i>
+                    <h2 class="text-3xl font-bold text-blue-900">Contexto y Objetivos Estratégicos</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <p class="text-lg leading-relaxed mb-6 text-gray-700">
+                            La Secretaría de Control Público enfrenta el desafío diario de garantizar el debido proceso en el juzgamiento de faltas. El diligenciamiento de notificaciones en papel representa un dispendio jurisdiccional, económico y ecológico.
+                        </p>
+                        <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-800">
+                            <h4 class="font-bold text-blue-900 mb-2">La Política de Despapelización</h4>
+                            <p class="text-sm text-gray-700">
+                                Reemplazar la cédula física por un mecanismo digital fehaciente optimiza los recursos de la Agencia Gubernamental de Control y del Juzgado Municipal de Faltas.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col justify-center gap-6">
+                        <div class="flex items-start"><i data-lucide="zap" class="w-8 h-8 text-yellow-500 mr-4 flex-shrink-0"></i><div><h4 class="font-bold text-gray-900">Celeridad Procesal</h4><p class="text-sm text-gray-600">Reducción de los tiempos muertos.</p></div></div>
+                        <div class="flex items-start"><i data-lucide="shield-check" class="w-8 h-8 text-green-600 mr-4 flex-shrink-0"></i><div><h4 class="font-bold text-gray-900">Seguridad Jurídica</h4><p class="text-sm text-gray-600">Garantizar el derecho de defensa.</p></div></div>
+                        <div class="flex items-start"><i data-lucide="coins" class="w-8 h-8 text-blue-600 mr-4 flex-shrink-0"></i><div><h4 class="font-bold text-gray-900">Economía Administrativa</h4><p class="text-sm text-gray-600">Ahorro drástico en logística y papel.</p></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EL DOMICILIO CCYCN -->
+        <section class="slide bg-gray-50">
+            <div class="slide-content">
+                <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
+                    <i data-lucide="scale" class="w-10 h-10 text-blue-900 mr-4"></i>
+                    <h2 class="text-3xl font-bold text-blue-900">El Domicilio en el Derecho de Fondo</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200"><h3 class="font-bold text-xl mb-3 text-gray-800">Domicilio Real</h3><p class="text-sm text-gray-600">Lugar de residencia habitual (Art. 73 CCyCN).</p></div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200"><h3 class="font-bold text-xl mb-3 text-gray-800">Domicilio Legal</h3><p class="text-sm text-gray-600">Lugar de residencia presunta por ley (Art. 74 CCyCN).</p></div>
+                    <div class="bg-blue-900 text-white p-6 rounded-lg shadow-md transform scale-105">
+                        <div class="flex justify-between items-start mb-3"><h3 class="font-bold text-xl">Domicilio Especial / Electrónico</h3><i data-lucide="smartphone" class="w-6 h-6 text-blue-300"></i></div>
+                        <p class="text-sm text-blue-100 mb-4"><strong>(Art. 75 CCyCN)</strong> "Pueden además constituir un domicilio electrónico en el que se tengan por eficaces todas las notificaciones..."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FIRMA DIGITAL -->
+        <section class="slide bg-white">
+            <div class="slide-content">
+                <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
+                    <i data-lucide="file-check-2" class="w-10 h-10 text-blue-900 mr-4"></i>
+                    <h2 class="text-3xl font-bold text-blue-900">El Standard Legal: La Firma Digital</h2>
+                </div>
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="w-full md:w-1/2">
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><i data-lucide="check-circle" class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1"></i><div><h4 class="font-bold text-gray-800">Consentimiento Previo (DDJJ)</h4><p class="text-sm text-gray-600">El vecino constituye dicho domicilio libremente.</p></div></li>
+                            <li class="flex items-start"><i data-lucide="check-circle" class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1"></i><div><h4 class="font-bold text-gray-800">Documento Firmado Digitalmente</h4><p class="text-sm text-gray-600">El PDF cuenta con Firma Digital del Juez o Funcionario (Ley Nac. N° 25.506, Arts. 2 y 3).</p></div></li>
+                            <li class="flex items-start"><i data-lucide="check-circle" class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1"></i><div><h4 class="font-bold text-gray-800">Sello de Tiempo (Timestamping)</h4><p class="text-sm text-gray-600">Certifica fecha y hora inalterable.</p></div></li>
+                        </ul>
+                    </div>
+                    <div class="w-full md:w-1/2 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <h4 class="font-bold text-center text-blue-900 mb-4 border-b pb-2">Efecto Jurídico del Envío</h4>
+                        <p class="text-sm text-gray-700 text-justify">
+                            La notificación se considera perfeccionada <strong>en el momento en que el sistema registra el envío exitoso</strong> al canal declarado. No se requiere el "doble tilde azul" o confirmación de lectura.
                         </p>
                     </div>
                 </div>
-                <div class="flex flex-col justify-center gap-6">
-                    <div class="flex items-start">
-                        <i data-lucide="zap" class="w-8 h-8 text-yellow-500 mr-4 flex-shrink-0"></i>
-                        <div>
-                            <h4 class="font-bold text-gray-900">Celeridad Procesal</h4>
-                            <p class="text-gray-600">Reducción de los tiempos muertos entre la emisión del acto y su notificación al infractor.</p>
-                        </div>
+            </div>
+        </section>
+        
+        <!-- OBLIGATORIEDAD -->
+        <section class="slide bg-gray-50">
+            <div class="slide-content">
+                <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
+                    <i data-lucide="gavel" class="w-10 h-10 text-blue-900 mr-4"></i>
+                    <h2 class="text-3xl font-bold text-blue-900">Constitución: Obligatoriedad</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border-t-4 border-blue-900">
+                        <h3 class="font-bold text-xl mb-4 text-gray-800">Personas Humanas (Ciudadanos)</h3>
+                        <p class="text-sm text-gray-600">Al iniciar un trámite o ser imputado en un acta, <strong>deberá</strong> fijar domicilio electrónico en su primera presentación.</p>
                     </div>
-                    <div class="flex items-start">
-                        <i data-lucide="shield-check" class="w-8 h-8 text-green-600 mr-4 flex-shrink-0"></i>
-                        <div>
-                            <h4 class="font-bold text-gray-900">Seguridad Jurídica</h4>
-                            <p class="text-gray-600">Garantizar el derecho de defensa del ciudadano mediante canales de recepción directa y comprobable.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start">
-                        <i data-lucide="coins" class="w-8 h-8 text-blue-600 mr-4 flex-shrink-0"></i>
-                        <div>
-                            <h4 class="font-bold text-gray-900">Economía Administrativa</h4>
-                            <p class="text-gray-600">Ahorro drástico en insumos (papel, tóner) y logística de los agentes notificadores.</p>
-                        </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border-t-4 border-blue-900">
+                        <h3 class="font-bold text-xl mb-4 text-gray-800">Personas Jurídicas y Profesionales</h3>
+                        <p class="text-sm text-gray-600 mb-2">Obligatoriedad <strong>estricta e inmediata</strong> para:</p>
+                        <ul class="list-disc pl-5 text-sm text-gray-600">
+                            <li>Empresas y Sociedades.</li>
+                            <li>Abogados apoderados/patrocinantes ante el Juzgado.</li>
+                            <li>Proveedores del Estado.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- MARCO CONCEPTUAL: EL DOMICILIO -->
-    <section class="slide bg-gray-50">
-        <div class="slide-content fade-in">
-            <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
-                <i data-lucide="scale" class="w-10 h-10 text-blue-900 mr-4"></i>
-                <h2 class="text-3xl font-bold text-blue-900">El Domicilio en el Derecho de Fondo</h2>
-            </div>
-
-            <p class="text-lg mb-8 text-gray-700">
-                Toda notificación tiene por objeto poner en conocimiento de las partes una resolución para garantizar el debido proceso. Para ello, debemos comprender la naturaleza jurídica del domicilio según el <strong>Código Civil y Comercial de la Nación (CCyCN)</strong>.
-            </p>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h3 class="font-bold text-xl mb-3 text-gray-800">Domicilio Real</h3>
-                    <p class="text-sm text-gray-600 mb-4">Lugar de residencia habitual de la persona humana (Art. 73 CCyCN). Históricamente, el asiento principal de las notificaciones fehacientes en papel.</p>
+        <!-- FUENTES -->
+        <section class="slide bg-white">
+            <div class="slide-content">
+                <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
+                    <i data-lucide="library" class="w-10 h-10 text-blue-900 mr-4"></i>
+                    <h2 class="text-3xl font-bold text-blue-900">Fuentes Normativas Consultadas</h2>
                 </div>
-                
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h3 class="font-bold text-xl mb-3 text-gray-800">Domicilio Legal</h3>
-                    <p class="text-sm text-gray-600 mb-4">Lugar donde la ley presume que una persona reside para el ejercicio de sus derechos y obligaciones, como el caso de los funcionarios o militares (Art. 74 CCyCN).</p>
-                </div>
-
-                <div class="bg-blue-900 text-white p-6 rounded-lg shadow-md transform scale-105">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-bold text-xl">Domicilio Especial / Electrónico</h3>
-                        <i data-lucide="smartphone" class="w-6 h-6 text-blue-300"></i>
-                    </div>
-                    <p class="text-sm text-blue-100 mb-4">
-                        <strong>(Art. 75 CCyCN)</strong> Las partes pueden elegir un domicilio para el ejercicio de sus derechos. <em>"Pueden además constituir un <strong>domicilio electrónico</strong> en el que se tengan por eficaces todas las notificaciones..."</em>
-                    </p>
-                    <div class="bg-white/20 px-3 py-2 rounded text-xs font-semibold">
-                        Sustento Jurídico Principal
-                    </div>
-                </div>
-            </div>
-            
-            <p class="mt-8 text-gray-600 italic text-sm">
-                * A su vez, los Códigos Procesales (Nacional y Provincial de Santa Fe) han receptado y normado la obligatoriedad de constituir domicilio procesal electrónico para tramitaciones judiciales, sentando jurisprudencia pacífica sobre su validez probatoria.
-            </p>
-        </div>
-    </section>
-
-    <!-- NORMATIVA PROVINCIAL Y NACIONAL -->
-    <section class="slide bg-white">
-        <div class="slide-content fade-in">
-            <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
-                <i data-lucide="book-open" class="w-10 h-10 text-blue-900 mr-4"></i>
-                <h2 class="text-3xl font-bold text-blue-900">Armonía Normativa Nacional y Provincial</h2>
-            </div>
-
-            <p class="text-lg mb-6 text-gray-700">
-                La propuesta para la ciudad de Reconquista no es aislada, sino que se enmarca y fundamenta en el moderno corpus normativo argentino y santafesino.
-            </p>
-
-            <div class="space-y-6">
-                <!-- Ley 14428 -->
-                <div class="flex flex-col md:flex-row border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-gray-100 md:w-1/4 p-4 flex items-center justify-center border-r border-gray-200">
-                        <span class="font-bold text-gray-800 text-center">Ley Prov. 14.428<br><span class="text-xs text-gray-500">Procedimiento Administrativo<br>(Arts. 1 y 2)</span></span>
-                    </div>
-                    <div class="p-4 md:w-3/4">
-                        <p class="text-gray-700 text-sm">Esta nueva ley provincial consagra la despapelización, el uso de plataformas digitales y el deber de simplificación administrativa. Habilita a la administración a utilizar redes estatales y medios electrónicos para comunicarse con el administrado.</p>
-                    </div>
-                </div>
-
-                <!-- Ley 14256 -->
-                <div class="flex flex-col md:flex-row border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-gray-100 md:w-1/4 p-4 flex items-center justify-center border-r border-gray-200">
-                        <span class="font-bold text-gray-800 text-center">Ley Prov. 14.256<br><span class="text-xs text-gray-500">Gobernanza de Datos<br>(Art. 3)</span></span>
-                    </div>
-                    <div class="p-4 md:w-3/4">
-                        <p class="text-gray-700 text-sm">Define el "Estado Inteligente" e instruye la implementación de canales digitales de vinculación con la ciudadanía, consolidando el valor legal del ecosistema digital provincial.</p>
-                    </div>
-                </div>
-
-                <!-- Ley Orgánica de Municipios -->
-                <div class="flex flex-col md:flex-row border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-gray-100 md:w-1/4 p-4 flex items-center justify-center border-r border-gray-200">
-                        <span class="font-bold text-gray-800 text-center">Ley Orgánica de<br>Municipios<br><span class="text-xs text-gray-500">Nueva Ley Pcial.<br>(Art. 86)</span></span>
-                    </div>
-                    <div class="p-4 md:w-3/4">
-                        <p class="text-gray-700 text-sm">Otorga autonomía a los municipios para organizar su administración interna y dictar ordenanzas sobre su procedimiento de faltas, dándonos el marco competencial perfecto para legislar esta materia a nivel local.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- EL MODELO PROPUESTO -->
-    <section class="slide bg-gray-50">
-        <div class="slide-content fade-in">
-            <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
-                <i data-lucide="settings" class="w-10 h-10 text-blue-900 mr-4"></i>
-                <h2 class="text-3xl font-bold text-blue-900">El Modelo Propuesto: Pragmático y Seguro</h2>
-            </div>
-
-            <p class="text-lg mb-8 text-gray-700">
-                La visión de la Secretaría de Control Público es implementar un sistema inmediato, que no dependa de complejas plataformas centralizadas en esta primera etapa, sino que aproveche los canales de comunicación cotidianos del vecino (Correo Electrónico, WhatsApp, Telegram).
-            </p>
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 text-center">
-                <div class="p-4 relative">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-blue-900">
-                        <span class="text-2xl font-bold text-blue-900">1</span>
-                    </div>
-                    <h4 class="font-bold mb-2">Trámite/Infracción</h4>
-                    <p class="text-xs text-gray-600">El vecino inicia un trámite o se le labra un acta por parte de la Agencia Gubernamental de Control.</p>
-                    <!-- Flecha -->
-                    <div class="hidden md:block absolute top-1/4 -right-4 text-gray-400">
-                        <i data-lucide="arrow-right" class="w-8 h-8"></i>
-                    </div>
-                </div>
-
-                <div class="p-4 relative">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-blue-900">
-                        <span class="text-2xl font-bold text-blue-900">2</span>
-                    </div>
-                    <h4 class="font-bold mb-2">Declaración Jurada</h4>
-                    <p class="text-xs text-gray-600">Firma una DDJJ manifestando su voluntad de constituir como <strong>domicilio digital</strong> una cuenta de correo, WhatsApp, etc.</p>
-                    <div class="hidden md:block absolute top-1/4 -right-4 text-gray-400">
-                        <i data-lucide="arrow-right" class="w-8 h-8"></i>
-                    </div>
-                </div>
-
-                <div class="p-4 relative">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-blue-900">
-                        <span class="text-2xl font-bold text-blue-900">3</span>
-                    </div>
-                    <h4 class="font-bold mb-2">Verificación</h4>
-                    <p class="text-xs text-gray-600">En el mismo acto, el Estado envía un mensaje de prueba. El vecino confirma recepción. El canal queda perfeccionado y consentido.</p>
-                    <div class="hidden md:block absolute top-1/4 -right-4 text-gray-400">
-                        <i data-lucide="arrow-right" class="w-8 h-8"></i>
-                    </div>
-                </div>
-
-                <div class="p-4">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-green-600">
-                        <span class="text-2xl font-bold text-green-600">4</span>
-                    </div>
-                    <h4 class="font-bold mb-2">Notificación Válida</h4>
-                    <p class="text-xs text-gray-600">El Juzgado de Faltas remite las notificaciones a ese canal. El solo envío exitoso surte plenos efectos legales.</p>
-                </div>
-            </div>
-            
-        </div>
-    </section>
-
-    <!-- ESTÁNDARES DE FIRMA DIGITAL -->
-    <section class="slide bg-white">
-        <div class="slide-content fade-in">
-            <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
-                <i data-lucide="file-check-2" class="w-10 h-10 text-blue-900 mr-4"></i>
-                <h2 class="text-3xl font-bold text-blue-900">El Standard Legal: La Firma Digital</h2>
-            </div>
-
-            <p class="text-lg mb-6 text-gray-700">
-                Es un error conceptual asumir que "cualquier mensaje de WhatsApp" es una notificación fehaciente. Para dotar al sistema de presunción de legitimidad, no repudio e inalterabilidad, debemos cumplir con estándares técnicos rigurosos.
-            </p>
-
-            <div class="flex flex-col md:flex-row gap-8 items-center">
-                <div class="w-full md:w-1/2">
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <i data-lucide="check-circle" class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1"></i>
-                            <div>
-                                <h4 class="font-bold text-gray-800">Consentimiento Previo (DDJJ)</h4>
-                                <p class="text-sm text-gray-600">El envío solo es válido porque el vecino <em>constituyó</em> dicho domicilio libremente (Art. 75 CCyCN).</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <i data-lucide="check-circle" class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1"></i>
-                            <div>
-                                <h4 class="font-bold text-gray-800">Documento Firmado Digitalmente</h4>
-                                <p class="text-sm text-gray-600">La cédula/resolución enviada como archivo adjunto (ej. PDF) debe contar con <strong>Firma Digital</strong> del Juez o Funcionario competente (Ley Nacional N° 25.506, Arts. 2 y 3).</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <i data-lucide="check-circle" class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1"></i>
-                            <div>
-                                <h4 class="font-bold text-gray-800">Sello de Tiempo (Timestamping)</h4>
-                                <p class="text-sm text-gray-600">Certifica la fecha y hora exacta de emisión, garantizando el cómputo de los plazos procesales.</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-                <div class="w-full md:w-1/2 bg-gray-50 p-6 rounded-lg border border-gray-200">
-                    <h4 class="font-bold text-center text-blue-900 mb-4 border-b pb-2">Efecto Jurídico del Envío</h4>
-                    <p class="text-sm text-gray-700 text-justify">
-                        Bajo este estándar, la notificación se considera perfeccionada <strong>en el momento en que el sistema municipal registra el envío exitoso</strong> (o la puesta a disposición) al canal declarado. No se requiere el "doble tilde azul" o confirmación de lectura, del mismo modo que el cartero que deja el aviso debajo de la puerta en un domicilio cerrado cumple con el acto notificatorio.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- OBLIGATORIEDAD -->
-    <section class="slide bg-gray-50">
-        <div class="slide-content fade-in">
-            <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
-                <i data-lucide="gavel" class="w-10 h-10 text-blue-900 mr-4"></i>
-                <h2 class="text-3xl font-bold text-blue-900">Constitución: ¿Voluntaria u Obligatoria?</h2>
-            </div>
-
-            <p class="text-lg mb-6 text-gray-700">
-                Desde la Secretaría de Control Público y la Agencia Gubernamental de Control sostenemos la postura de que el Domicilio Digital debe tener carácter <strong>Obligatorio</strong>.
-            </p>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-                <div class="bg-white p-6 rounded-lg shadow-sm border-t-4 border-blue-900">
-                    <h3 class="font-bold text-xl mb-4 text-gray-800">Personas Físicas (Ciudadanos)</h3>
-                    <p class="text-sm text-gray-600 mb-4">
-                        Toda persona que inicie un trámite, obtenga una habilitación o sea parte en un acta de infracción, <strong>deberá</strong> fijar domicilio electrónico. El Municipio tiene la potestad de exigir este requisito como condición para la prosecución del trámite, en virtud del principio de colaboración (Ley 14.428).
-                    </p>
-                </div>
-
-                <div class="bg-white p-6 rounded-lg shadow-sm border-t-4 border-blue-900">
-                    <h3 class="font-bold text-xl mb-4 text-gray-800">Personas Jurídicas y Profesionales</h3>
-                    <p class="text-sm text-gray-600 mb-4">
-                        La obligatoriedad debe ser <strong>estricta e inmediata</strong> para:
-                    </p>
-                    <ul class="list-disc pl-5 text-sm text-gray-600 space-y-2">
-                        <li>Empresas, Sociedades y Comercios (a través de sus apoderados o representantes legales).</li>
-                        <li>Abogados que actúen como patrocinantes o apoderados ante el Juzgado de Faltas.</li>
-                        <li>Proveedores del Estado Municipal.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- GLOSARIO TÉCNICO-JURÍDICO -->
-    <section class="slide bg-white">
-        <div class="slide-content fade-in">
-            <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
-                <i data-lucide="book-a" class="w-10 h-10 text-blue-900 mr-4"></i>
-                <h2 class="text-3xl font-bold text-blue-900">Glosario Técnico-Jurídico</h2>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-gray-50 p-5 rounded border-l-4 border-blue-800">
-                    <h4 class="font-bold text-gray-900 text-lg">Domicilio Especial</h4>
-                    <p class="text-sm text-gray-700 mt-2">Aquel que las partes constituyen para el ejercicio de sus derechos y obligaciones en un marco jurídico determinado (conforme Art. 75 CCyCN).</p>
-                </div>
-                <div class="bg-gray-50 p-5 rounded border-l-4 border-blue-800">
-                    <h4 class="font-bold text-gray-900 text-lg">Domicilio Electrónico</h4>
-                    <p class="text-sm text-gray-700 mt-2">Sede virtual, segura y personalizada (correo electrónico, aplicación de mensajería) constituida para recibir notificaciones fehacientes con plenos efectos legales.</p>
-                </div>
-                <div class="bg-gray-50 p-5 rounded border-l-4 border-blue-800">
-                    <h4 class="font-bold text-gray-900 text-lg">Firma Digital</h4>
-                    <p class="text-sm text-gray-700 mt-2">Herramienta tecnológica y matemática que asegura el origen de un documento digital y garantiza que su contenido no haya sido alterado (Ley N° 25.506).</p>
-                </div>
-                <div class="bg-gray-50 p-5 rounded border-l-4 border-blue-800">
-                    <h4 class="font-bold text-gray-900 text-lg">Sello de Tiempo (Timestamping)</h4>
-                    <p class="text-sm text-gray-700 mt-2">Certificación tecnológica que acredita la fecha y hora exacta de existencia o envío de un documento digital, crucial para el cómputo de plazos procesales.</p>
-                </div>
-                <div class="bg-gray-50 p-5 rounded border-l-4 border-blue-800 md:col-span-2">
-                    <h4 class="font-bold text-gray-900 text-lg">Despapelización</h4>
-                    <p class="text-sm text-gray-700 mt-2">Política de gestión pública orientada a suprimir progresivamente los expedientes y trámites en soporte físico, reemplazándolos por canales digitales más eficientes y ecológicos.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FUENTES CONSULTADAS -->
-    <section class="slide bg-gray-50">
-        <div class="slide-content fade-in">
-            <div class="flex items-center mb-8 border-b-2 border-blue-900 pb-4">
-                <i data-lucide="library" class="w-10 h-10 text-blue-900 mr-4"></i>
-                <h2 class="text-3xl font-bold text-blue-900">Fuentes Normativas y Documentales</h2>
-            </div>
-
-            <ul class="space-y-4 text-gray-700 text-sm md:text-base">
-                <li class="flex items-start">
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5"></i>
-                    <span><strong>Código Civil y Comercial de la Nación</strong> (Ley Nacional N° 26.994). Especial referencia a los Arts. 73, 74 y 75.</span>
-                </li>
-                <li class="flex items-start">
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5"></i>
-                    <span><strong>Ley de Firma Digital</strong> (Ley Nacional N° 25.506).</span>
-                </li>
-                <li class="flex items-start">
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5"></i>
-                    <span><strong>Ley de Procedimiento Administrativo de la Provincia de Santa Fe</strong> (Ley Provincial N° 14.428).</span>
-                </li>
-                <li class="flex items-start">
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5"></i>
-                    <span><strong>Ley de Gobernanza de Datos y Acceso a la Información Pública</strong> (Ley Provincial N° 14.256).</span>
-                </li>
-                <li class="flex items-start">
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5"></i>
-                    <span><strong>Nueva Ley Orgánica de Municipalidades de la Provincia de Santa Fe</strong> (Sancionada en abril 2026, ref. Art. 86).</span>
-                </li>
-                <li class="flex items-start">
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5"></i>
-                    <span><strong>Doctrina:</strong> Manterola, Nicolás I. <em>"La notificación procesal y la digitalización de las actuaciones"</em> (Ed. Microjuris Argentina, 2017).</span>
-                </li>
-                <li class="flex items-start">
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5"></i>
-                    <span><strong>Documento Base:</strong> <em>"Implementación del Domicilio y Notificación Electrónica en Reconquista"</em>.</span>
-                </li>
-            </ul>
-        </div>
-    </section>
-
-    <!-- CONCLUSIÓN -->
-    <section class="slide bg-blue-900 text-white">
-        <div class="slide-content text-center fade-in">
-            <i data-lucide="award" class="w-16 h-16 text-blue-300 mx-auto mb-6"></i>
-            <h2 class="text-4xl font-bold mb-8">Conclusión y Factibilidad</h2>
-            
-            <p class="text-xl font-light leading-relaxed max-w-3xl mx-auto mb-10 text-blue-50">
-                La creación del Domicilio Digital mediante Ordenanza Municipal es <strong>jurídicamente factible, legalmente robusta y administrativamente necesaria</strong>. 
-            </p>
-            
-            <div class="bg-white/10 p-8 rounded-lg max-w-4xl mx-auto text-left backdrop-blur-sm">
-                <ul class="space-y-4 text-lg">
-                    <li class="flex items-center">
-                        <i data-lucide="check" class="w-6 h-6 text-blue-300 mr-3"></i>
-                        Existe amparo en el derecho de fondo (Art. 75 CCyCN) y de forma.
-                    </li>
-                    <li class="flex items-center">
-                        <i data-lucide="check" class="w-6 h-6 text-blue-300 mr-3"></i>
-                        Se alinea con las Leyes Provinciales de despapelización (14.256, 14.428).
-                    </li>
-                    <li class="flex items-center">
-                        <i data-lucide="check" class="w-6 h-6 text-blue-300 mr-3"></i>
-                        El uso de Declaración Jurada + Firma Digital suplanta temporalmente la necesidad de una ID centralizada, permitiendo acción inmediata.
-                    </li>
-                    <li class="flex items-center">
-                        <i data-lucide="check" class="w-6 h-6 text-blue-300 mr-3"></i>
-                        Optimizará los recursos humanos y financieros de la Municipalidad de Reconquista.
-                    </li>
+                <ul class="space-y-3 text-gray-700 text-sm">
+                    <li><strong>Código Civil y Comercial de la Nación</strong> (L.N. 26.994). Arts. 73, 74 y 75.</li>
+                    <li><strong>Ley de Firma Digital</strong> (L.N. 25.506).</li>
+                    <li><strong>Ley de Procedimiento Administrativo SF</strong> (L.P. 14.428).</li>
+                    <li><strong>Ley de Gobernanza de Datos SF</strong> (L.P. 14.256).</li>
+                    <li><strong>Nueva Ley Orgánica de Municipalidades SF</strong> (Art. 86).</li>
                 </ul>
             </div>
-            
-            <p class="mt-12 text-blue-200 text-sm font-semibold tracking-widest uppercase">
-                Muchas gracias por su atención.
-            </p>
+        </section>
+    </div>
+
+    <!-- ==========================================
+         PESTAÑA 2: PROCEDIMIENTO Y DIAGRAMA VISUAL
+         ========================================== -->
+    <div id="tab-flujo" class="tab-content pt-10 pb-20">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-blue-900 font-serif">Simulación del Procedimiento Técnico</h2>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Así funciona el ecosistema de notificación, integrando la gestión administrativa con los canales cotidianos del ciudadano.</p>
+            </div>
+
+            <!-- Paso 1 y 2 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 items-center">
+                <!-- Explicación Paso 1 -->
+                <div>
+                    <span class="inline-block bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-full mb-3">PASO 1 y 2</span>
+                    <h3 class="text-2xl font-bold mb-4">Adhesión y Validación</h3>
+                    <p class="text-gray-700 mb-4 text-justify">El infractor completa la <strong>Declaración Jurada</strong> fijando su número de celular. El sistema municipal envía un mensaje de prueba al WhatsApp declarado. Al responder afirmativamente, el canal queda <strong>perfeccionado legalmente</strong>.</p>
+                </div>
+                <!-- Visual Celular 1 -->
+                <div class="flex justify-center relative">
+                    <div class="w-64 h-[500px] border-[10px] border-gray-800 rounded-[2.5rem] bg-gray-100 relative overflow-hidden shadow-2xl">
+                        <!-- Top Bar Celular -->
+                        <div class="bg-green-600 text-white p-3 flex items-center shadow-md">
+                            <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-green-600 mr-2"><i data-lucide="building-2" class="w-5 h-5"></i></div>
+                            <div><p class="text-sm font-bold leading-tight">Muni Reconquista</p><p class="text-[10px] opacity-80 leading-tight">Cuenta Oficial</p></div>
+                        </div>
+                        <!-- Chat Area -->
+                        <div class="p-3 bg-[#efeae2] h-full flex flex-col gap-3">
+                            <!-- Msg Muni -->
+                            <div class="bg-white p-2 rounded-lg rounded-tl-none text-sm text-gray-800 shadow-sm max-w-[85%] self-start relative">
+                                👋 Hola. La Municipalidad de Reconquista le solicita validar este canal como su Domicilio Especial Electrónico. ¿Confirma?
+                                <p class="text-[9px] text-gray-400 text-right mt-1">10:15</p>
+                            </div>
+                            <!-- Msg Usuario -->
+                            <div class="bg-[#dcf8c6] p-2 rounded-lg rounded-tr-none text-sm text-gray-800 shadow-sm max-w-[85%] self-end relative">
+                                Sí, confirmo.
+                                <p class="text-[9px] text-gray-400 text-right mt-1">10:16 <span class="text-blue-500">✓✓</span></p>
+                            </div>
+                            <!-- System Msg -->
+                            <div class="bg-yellow-100/80 text-yellow-800 p-2 rounded text-xs text-center mx-4 mt-2 shadow-sm border border-yellow-200">
+                                <i data-lucide="lock" class="w-3 h-3 inline mr-1"></i>Canal validado y vinculado al Expte.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paso 3 y 4 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <!-- Visual Celular 2 -->
+                <div class="flex justify-center order-2 md:order-1 relative">
+                    <div class="w-64 h-[500px] border-[10px] border-gray-800 rounded-[2.5rem] bg-gray-100 relative overflow-hidden shadow-2xl">
+                        <div class="bg-green-600 text-white p-3 flex items-center shadow-md">
+                            <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-green-600 mr-2"><i data-lucide="scale" class="w-5 h-5"></i></div>
+                            <div><p class="text-sm font-bold leading-tight">Juzgado de Faltas</p><p class="text-[10px] opacity-80 leading-tight">Muni Reconquista</p></div>
+                        </div>
+                        <div class="p-3 bg-[#efeae2] h-full flex flex-col gap-3">
+                            <!-- Msg Muni (Notificación) -->
+                            <div class="bg-white p-3 rounded-lg rounded-tl-none text-sm text-gray-800 shadow-sm w-[90%] self-start border-l-4 border-red-500">
+                                ⚠️ <strong>Cédula de Notificación</strong><br>
+                                Expte: 452/2026<br>
+                                <span class="text-xs text-gray-500">Adjuntamos resolución firmada digitalmente.</span>
+                                <!-- Documento adjunto simulado -->
+                                <div class="bg-gray-100 p-2 rounded mt-2 flex items-center border border-gray-200">
+                                    <i data-lucide="file-text" class="text-red-500 w-6 h-6 mr-2"></i>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold truncate">Resolucion_Faltas.pdf</p>
+                                        <p class="text-[10px] text-gray-500">125 KB • PDF</p>
+                                    </div>
+                                    <i data-lucide="download" class="text-gray-400 w-4 h-4"></i>
+                                </div>
+                                <p class="text-[9px] text-gray-400 text-right mt-2">12:30 <i data-lucide="check" class="w-3 h-3 inline text-gray-400"></i></p>
+                            </div>
+                            <div class="bg-blue-100/80 text-blue-800 p-2 rounded text-[10px] text-center mt-1 border border-blue-200">
+                                ⏱️ Timestamp: El sistema registró la entrega a las 12:30hs. <strong>Notificación perfeccionada.</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Explicación Paso 3 -->
+                <div class="order-1 md:order-2">
+                    <span class="inline-block bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-full mb-3">PASO 3 y 4</span>
+                    <h3 class="text-2xl font-bold mb-4">Firma Digital y Despacho</h3>
+                    <p class="text-gray-700 mb-4 text-justify">El Juez de Faltas estampa su <strong>Firma Digital</strong> (Ej: mediante Token USB y XolidoSign) sobre el documento PDF garantizando su inalterabilidad.</p>
+                    <p class="text-gray-700 text-justify mb-4">El documento se envía. La notificación surte plenos efectos legales <strong>en el momento en que el sistema registra la entrega (tilde gris)</strong>, sin requerir lectura (tilde azul).</p>
+                    
+                    <div class="bg-yellow-50 p-4 border-l-4 border-yellow-500 rounded mt-6">
+                        <p class="text-sm text-yellow-800 font-semibold flex items-center"><i data-lucide="info" class="w-4 h-4 mr-2"></i> Bloqueo de Nulidades</p>
+                        <p class="text-xs text-yellow-700 mt-1">El infractor no puede alegar "no haber abierto el mensaje". El estado cumple poniendo la resolución a disposición en el domicilio que el ciudadano eligió.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
+
+    <!-- ==========================================
+         PESTAÑA 3: FORMULARIO DDJJ (IMPRIMIBLE)
+         ========================================== -->
+    <div id="tab-ddjj" class="tab-content pt-10 pb-20 bg-gray-200 min-h-screen">
+        <div class="text-center mb-6 no-print">
+            <button onclick="imprimirDDJJ()" class="bg-blue-800 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 font-bold flex items-center justify-center mx-auto transition-transform hover:scale-105">
+                <i data-lucide="printer" class="w-5 h-5 mr-2"></i> Imprimir Formulario para Firma
+            </button>
+            <p class="text-sm text-gray-600 mt-2">Puede completarlo en la PC antes de imprimirlo, o imprimirlo vacío para llenado manual.</p>
+        </div>
+
+        <!-- CONTENEDOR DEL FORMULARIO -->
+        <div id="ddjj-form-container" class="bg-white max-w-4xl mx-auto p-10 md:p-16 shadow-2xl border border-gray-300">
+            <!-- Encabezado Formulario -->
+            <div class="flex justify-between items-center mb-8 border-b-2 border-black pb-4">
+                <img src="https://res.cloudinary.com/dthg9wo6r/image/upload/v1763866183/Reconquista_Logo-2022_BLANCOEslogan-768x155_jpqe3v.png" alt="Logo Muni" class="h-12" style="filter: grayscale(100%);">
+                <div class="text-right">
+                    <h2 class="font-bold text-lg leading-tight uppercase">Anexo I</h2>
+                    <h3 class="text-sm text-gray-600">Secretaría de Control Público</h3>
+                </div>
+            </div>
+
+            <h1 class="text-xl md:text-2xl font-bold text-center mb-8 uppercase tracking-wide">Declaración Jurada de Constitución<br>de Domicilio Especial Electrónico</h1>
+            
+            <div class="flex justify-end mb-6 text-sm">
+                <span><strong>Lugar y Fecha:</strong> Reconquista, <input type="text" class="input-line w-48 text-center" placeholder="____ / ____ / 20__"></span>
+            </div>
+
+            <!-- Bloque 1 -->
+            <div class="mb-8">
+                <h4 class="font-bold bg-gray-100 py-1 px-2 border-l-4 border-black mb-4 uppercase text-sm">1. Datos del Declarante</h4>
+                <div class="space-y-4 text-sm">
+                    <div class="flex items-center"><span class="w-48 font-semibold">Nombre y Apellido / Razón Social:</span> <input type="text" class="input-line flex-1"></div>
+                    <div class="flex items-center"><span class="w-48 font-semibold">DNI / CUIT:</span> <input type="text" class="input-line flex-1"></div>
+                    <div class="flex items-center">
+                        <span class="w-48 font-semibold">Carácter en el que actúa:</span> 
+                        <label class="mr-4 flex items-center"><input type="checkbox" class="mr-1 border-black"> Titular</label>
+                        <label class="mr-4 flex items-center"><input type="checkbox" class="mr-1 border-black"> Apoderado / Rep. Legal</label>
+                        <label class="flex items-center"><input type="checkbox" class="mr-1 border-black"> Abogado Patrocinante</label>
+                    </div>
+                    <div class="flex items-center"><span class="w-48 font-semibold">Domicilio Real / Físico:</span> <input type="text" class="input-line flex-1"></div>
+                </div>
+            </div>
+
+            <!-- Bloque 2 -->
+            <div class="mb-8">
+                <h4 class="font-bold bg-gray-100 py-1 px-2 border-l-4 border-black mb-4 uppercase text-sm">2. Constitución de Domicilio Electrónico</h4>
+                <p class="text-xs text-justify mb-4">En el marco de lo dispuesto por el Artículo 75 del Código Civil y Comercial de la Nación y la Ordenanza Municipal correspondiente, constituyo formal y voluntariamente mi Domicilio Especial Electrónico en los siguientes canales (puede optar por uno o ambos):</p>
+                <div class="space-y-4 text-sm pl-4">
+                    <div class="flex items-center">
+                        <label class="font-semibold w-48 flex items-center"><input type="checkbox" class="mr-2"> Correo Electrónico:</label>
+                        <input type="email" class="input-line flex-1">
+                    </div>
+                    <div class="flex items-center">
+                        <label class="font-semibold w-48 flex items-center"><input type="checkbox" class="mr-2"> WhatsApp / Telegram:</label>
+                        <span class="mr-2 text-gray-500">+54 9</span><input type="text" class="input-line flex-1" placeholder="Ej: 3482 123456">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloque 3: Términos -->
+            <div class="mb-12">
+                <h4 class="font-bold bg-gray-100 py-1 px-2 border-l-4 border-black mb-4 uppercase text-sm">3. Términos y Condiciones (Consentimiento)</h4>
+                <p class="text-xs text-justify mb-2">El/la que suscribe, manifiesta con carácter de Declaración Jurada conocer y aceptar:</p>
+                <ul class="text-[11px] text-justify space-y-2 list-decimal pl-5">
+                    <li><strong>Validez Legal:</strong> Acepto expresamente que todas las citaciones, emplazamientos, actas y resoluciones cursadas por la AGC y/o el Juzgado de Faltas al/los canal/es aquí declarado/s, tendrán plena validez legal y eficacia probatoria.</li>
+                    <li><strong>Perfeccionamiento:</strong> Tomo conocimiento que la notificación se considerará perfeccionada el día y hora en que el sistema municipal registre el envío exitoso. <strong>No será exigible como requisito de validez el aviso de lectura ("visto" o "leído").</strong></li>
+                    <li><strong>Responsabilidad:</strong> Asumo la exclusiva responsabilidad de mantener operativo el canal (espacio en correo, línea activa). Fallas técnicas imputables a mi persona o prestadores no invalidarán las notificaciones.</li>
+                    <li><strong>Vigencia:</strong> Este domicilio mantendrá su vigencia para futuras actuaciones hasta tanto comunique formalmente su modificación.</li>
+                </ul>
+            </div>
+
+            <!-- Firmas -->
+            <div class="mt-16 flex justify-between px-10">
+                <div class="w-64 text-center">
+                    <div class="border-t border-black pt-2 text-sm">Firma del Declarante</div>
+                </div>
+                <div class="w-64 text-center">
+                    <div class="border-t border-black pt-2 text-sm">Aclaración y DNI</div>
+                </div>
+            </div>
+
+            <!-- Uso Administrativo -->
+            <div class="mt-12 border-t-2 border-dashed border-gray-400 pt-4 bg-gray-50 p-4">
+                <p class="text-xs font-bold text-center uppercase mb-4 text-gray-500">Reservado para Administración - Sello de Recepción y Alta</p>
+                <div class="flex justify-between text-xs">
+                    <span>Agente Interviniente: <input type="text" class="input-line w-32 bg-transparent"></span>
+                    <span>Validación de Canal: <input type="text" class="input-line w-24 bg-transparent text-center" placeholder="__/__/20__"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         PESTAÑA 4: PROYECTO DE ORDENANZA
+         ========================================== -->
+    <div id="tab-ordenanza" class="tab-content pt-10 pb-20 bg-gray-100 min-h-screen">
+        <!-- Contenedor tipo "Hoja Legal" -->
+        <div class="max-w-4xl mx-auto bg-white p-10 md:p-16 shadow-2xl border border-gray-300 text-justify font-serif text-gray-800 leading-relaxed text-sm md:text-base">
+            
+            <div class="text-center font-bold uppercase mb-8 border-b-2 border-gray-800 pb-4">
+                <p class="text-lg">Concejo Municipal</p>
+                <p class="text-lg">de Reconquista</p>
+                <p class="text-xs font-sans font-normal mt-1">3560 - RECONQUISTA (SANTA FE)</p>
+                <p class="text-xs font-sans font-normal">"RECONQUISTA CIUDAD ECUMÉNICA"</p>
+            </div>
+
+            <p class="text-right mb-6 text-sm font-sans">Comisión de Gobierno – Expte. N.º 229/2026</p>
+
+            <p class="font-bold mb-2">VISTO:</p>
+            <p class="mb-6 indent-8">La necesidad de modernizar, agilizar y dotar de mayor eficiencia a los procedimientos administrativos y contravencionales que tramitan por ante la Secretaría de Control Público de la Municipalidad de Reconquista; las disposiciones del Artículo 75° del Código Civil y Comercial de la Nación; la Ley Nacional N° 25.506 de Firma Digital; las Leyes Provinciales N° 14.256 de Gobernanza de Datos y N° 14.428 de Procedimiento Administrativo; el Artículo 86° de la Ley Orgánica de Municipalidades de la Provincia de Santa Fe; y</p>
+
+            <p class="font-bold mb-2">CONSIDERANDO:</p>
+            <p class="mb-4 indent-8">Que, es un objetivo estratégico del Estado Municipal avanzar hacia la despapelización, implementando el uso intensivo de Tecnologías de la Información y las Comunicaciones (TICs) para garantizar la celeridad, economía, sencillez y eficacia de los trámites.</p>
+            <p class="mb-4 indent-8">Que, el Artículo 75° del Código Civil y Comercial de la Nación faculta expresamente a las partes a constituir un domicilio electrónico en el que se tengan por eficaces todas las notificaciones, comunicaciones y emplazamientos que allí se dirijan.</p>
+            <p class="mb-4 indent-8">Que, para garantizar el derecho de defensa y el debido proceso, las notificaciones enviadas digitalmente deben estar respaldadas por el uso de Firma Digital y Sellado de Tiempo (Timestamping), otorgando certeza sobre la autoría, inalterabilidad y fecha de las resoluciones.</p>
+            <p class="mb-8 indent-8">Que, corresponde a este Honorable Concejo Municipal brindar el marco normativo para la implementación de esta herramienta, definiendo sus alcances, obligatoriedad y efectos jurídicos.</p>
+
+            <p class="text-center font-bold mb-6">Por ello,<br><br>EL CONCEJO MUNICIPAL DE LA CIUDAD DE RECONQUISTA,<br>SANCIONA CON FUERZA DE:<br>ORDENANZA N° _________</p>
+
+            <p class="mb-4"><strong>Artículo 1°). - CREACIÓN.</strong> CRÉASE en el ámbito de la Municipalidad de Reconquista el "Domicilio Especial Electrónico", el cual será de aplicación para todos los procedimientos, actuaciones, actas de infracción y resoluciones que tramiten por ante la Secretaría de Control Público, la Agencia Gubernamental de Control y los Juzgados Municipales de Faltas.</p>
+
+            <p class="mb-4"><strong>Artículo 2°). - DEFINICIÓN.</strong> Entiéndase por Domicilio Especial Electrónico a la sede virtual constituida por el administrado, consistente en una casilla de correo electrónico y/o una cuenta de aplicación de mensajería instantánea de telefonía móvil, a la cual se enviarán de manera segura las notificaciones institucionales.</p>
+
+            <p class="mb-4"><strong>Artículo 3°). - CONSTITUCIÓN Y OBLIGATORIEDAD.</strong> La constitución del Domicilio Especial Electrónico será un requisito obligatorio y exigible para:<br>
+            a) Las personas jurídicas, empresas, comercios y sociedades, a través de sus representantes legales o apoderados.<br>
+            b) Los profesionales del derecho que actúen en carácter de apoderados o patrocinantes en las actuaciones que tramiten por ante los Juzgados de Faltas.<br>
+            c) Los proveedores y contratistas del Estado Municipal.<br>
+            d) Las personas humanas que inicien un trámite, soliciten una habilitación o resulten imputadas en un acta de infracción labrada por la Agencia Gubernamental de Control, quienes deberán constituirlo en su primera presentación o comparencia.</p>
+
+            <p class="mb-4"><strong>Artículo 4°). - PROCEDIMIENTO DE ADHESIÓN.</strong> El Domicilio Especial Electrónico se constituirá mediante una Declaración Jurada suscripta por el interesado, y quedará perfeccionado una vez que el sistema informático o el agente municipal competente valide el canal mediante el envío de un mensaje de confirmación que deberá ser respondido afirmativamente por el titular.</p>
+
+            <p class="mb-4"><strong>Artículo 5°). - VALIDEZ Y EFICACIA PROBATORIA.</strong> Todas las citaciones, emplazamientos, traslados, intimaciones y sentencias cursadas al Domicilio Especial Electrónico tendrán idéntica validez jurídica y eficacia probatoria que las notificaciones diligenciadas en soporte papel. Los documentos adjuntos enviados (resoluciones, cédulas, actas) deberán contar con Firma Digital inserta por el funcionario público competente, conforme a lo establecido en la Ley Nacional N° 25.506.</p>
+
+            <p class="mb-4"><strong>Artículo 6°). - PERFECCIONAMIENTO DE LA NOTIFICACIÓN Y CÓMPUTO DE PLAZOS.</strong> La notificación se considerará perfeccionada y legalmente válida en el día y hora en que el sistema emisor de la Municipalidad de Reconquista registre el envío exitoso o la puesta a disposición del mensaje en el canal declarado, sin que sea exigible como requisito de validez el acuse de lectura o apertura por parte del destinatario. Si el registro del envío se produjere en un día u hora inhábil para la administración municipal, la notificación se tendrá por practicada y los plazos comenzarán a correr a partir de la primera hora del día hábil inmediato posterior.</p>
+
+            <p class="mb-4"><strong>Artículo 7°). - RESPONSABILIDAD DEL DECLARANTE.</strong> Es responsabilidad exclusiva del titular mantener operativo el Domicilio Especial Electrónico constituido, asegurar el espacio de almacenamiento necesario y revisar periódicamente las bandejas de entrada. La falta de acceso, deficiencias en el servicio de internet o telefonía imputables al usuario no invalidarán las notificaciones allí cursadas.</p>
+
+            <p class="mb-4"><strong>Artículo 8°). - IMPLEMENTACIÓN TÉCNICA.</strong> FACÚLTESE al Departamento Ejecutivo Municipal, a través de la Secretaría de Control Público y las áreas informáticas pertinentes, a reglamentar los aspectos operativos de la presente Ordenanza, determinar las plataformas de software a utilizar y establecer los mecanismos de Sellado de Tiempo (Timestamping) que documenten informáticamente el momento exacto del despacho de las notificaciones.</p>
+
+            <p class="mb-4"><strong>Artículo 9°). - ANEXO.</strong> APRUÉBASE como "ANEXO I" de la presente Ordenanza el modelo de "Declaración Jurada de Constitución de Domicilio Especial Electrónico", que forma parte integrante e inescindible de la misma.</p>
+
+            <p class="mb-8"><strong>Artículo 10°). -</strong> COMUNÍQUESE al Departamento Ejecutivo Municipal.</p>
+
+            <p class="text-right font-sans text-sm">SALA DE SESIONES, _____ de __________________ de 2026.</p>
+        </div>
+    </div>
 
     <script>
-        // Inicializar iconos de Lucide
+        // Inicializar iconos
         lucide.createIcons();
 
-        // Pequeño script para animar elementos al hacer scroll
+        // Lógica de pestañas (Tabs)
+        function switchTab(tabId, btnElement) {
+            // Ocultar todas las pestañas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Mostrar la seleccionada
+            document.getElementById(tabId).classList.add('active');
+
+            // Resetear estilos de los botones
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-800', 'text-white');
+                btn.classList.add('text-blue-200');
+            });
+            // Activar el botón clickeado
+            btnElement.classList.remove('text-blue-200');
+            btnElement.classList.add('bg-blue-800', 'text-white');
+            
+            // Volver arriba de la página
+            window.scrollTo(0, 0);
+        }
+
+        // Lógica para Imprimir específicamente el Formulario DDJJ
+        function imprimirDDJJ() {
+            document.body.classList.add('printing-form');
+            window.print();
+            // Remover clase al finalizar para que la web vuelva a la normalidad
+            setTimeout(() => { document.body.classList.remove('printing-form'); }, 500);
+        }
+
+        // Script para animar elementos al hacer scroll en la pestaña de Presentación
         document.addEventListener("DOMContentLoaded", function() {
             const slides = document.querySelectorAll('.slide');
-            
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -505,9 +508,7 @@
                 });
             }, { threshold: 0.1 });
 
-            slides.forEach(slide => {
-                observer.observe(slide);
-            });
+            slides.forEach(slide => observer.observe(slide));
         });
     </script>
 </body>
